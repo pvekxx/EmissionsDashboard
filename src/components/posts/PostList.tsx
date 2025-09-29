@@ -36,7 +36,7 @@ const PostList: React.FC<PostListProps> = ({ posts, companyId }) => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
             setEditingId(null);
         },
-        onError: (error: any) => {
+        onError: (error) => {
             setErrorMessage(error?.message || '게시물 저장 중 오류가 발생했습니다.');
         },
     });

@@ -11,7 +11,7 @@ import {
 
 export interface BarChartProps {
     // 차트에 전달할 데이터 배열
-    data: { name: string;[key: string]: any }[];
+    data: { name: string;[key: string]: string | number }[];
     // 값을 가져올 속성명
     valueKey?: string;
     // 범례에 표시할 라벨입니다
@@ -50,7 +50,7 @@ const BarChart: React.FC<BarChartProps> = ({ data, valueKey = 'value', label, ma
                         }}
                         itemStyle={{ color: '#111111' }}
                         labelStyle={{ color: '#111111', fontWeight: 600 }}
-                        formatter={(val: any) => [
+                        formatter={(val: string | number) => [
                             typeof val === 'number' ? val.toLocaleString() : val,
                             '배출량',
                         ]}

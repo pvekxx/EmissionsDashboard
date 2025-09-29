@@ -12,7 +12,7 @@ import {
 
 export interface LineChartProps {
     // 차트에 전달할 데이터 배열
-    data: { name: string;[key: string]: any }[];
+    data: { name: string;[key: string]: string | number }[];
     // Y축 값
     valueKey?: string;
     // 범례에 표시할 라벨

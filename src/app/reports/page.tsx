@@ -50,12 +50,12 @@ export default function ReportsPage() {
             setErrorMessage('');
             queryClient.invalidateQueries({ queryKey: ['posts'] });
         },
-        onError: (error: any) => {
+        onError: (error) => {
             setErrorMessage(error?.message || '게시물 저장 중 오류가 발생했습니다.');
         },
     });
 
-    // 게시물 클릭 → 편집 모드 진입
+    // 게시물 클릭 > 편집 모드 진입
     const handlePostClick = (post: Post) => {
         setEditId(post.id);
         setTitle(post.title);
@@ -81,7 +81,7 @@ export default function ReportsPage() {
         });
     };
 
-    // 취소 버튼 → 편집 모드 종료
+    // 취소 버튼 > 편집 모드 종료
     const handleCancel = () => {
         setEditId(undefined);
         setTitle('');
@@ -91,7 +91,7 @@ export default function ReportsPage() {
         setErrorMessage('');
     };
 
-    // 회사명과 게시물 목록을 연결
+    // 회사명/게시물 목록 연결
     const postsWithCompany = posts?.map((post) => {
         const company = companies?.find((c) => c.id === post.resourceUid);
         return {
@@ -100,7 +100,7 @@ export default function ReportsPage() {
         };
     });
 
-    // 게시물을 날짜별 내림차순으로 정렬
+    // 게시물 날짜별 내림차순 정렬
     postsWithCompany?.sort((a, b) => b.dateTime.localeCompare(a.dateTime));
 
     return (
