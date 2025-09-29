@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export interface MonthPickerProps {
     value: string; // YYYY-MM
@@ -22,7 +22,7 @@ const MonthPicker: React.FC<MonthPickerProps> = ({ value, onChange, className })
     const [year, setYear] = React.useState(parseYear(value));
     const containerRef = React.useRef<HTMLDivElement>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const onDocClick = (e: MouseEvent) => {
             if (!containerRef.current) return;
             if (!containerRef.current.contains(e.target as Node)) {
@@ -33,7 +33,7 @@ const MonthPicker: React.FC<MonthPickerProps> = ({ value, onChange, className })
         return () => document.removeEventListener('mousedown', onDocClick);
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setYear(parseYear(value));
     }, [value]);
 

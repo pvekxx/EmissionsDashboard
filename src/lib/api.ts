@@ -27,7 +27,7 @@ const countries = [
     { code: 'JP', name: 'Japan' },
     { code: 'FR', name: 'France' },
 ];
-let _countries = [...countries];
+const _countries = [...countries];
 
 ////////////////////////// 국가별 리포트
 const companies = [
@@ -107,7 +107,7 @@ const companies = [
         ],
     },
 ]
-let _companies = [...companies];
+const _companies = [...companies];
 
 ////////////////////////// 게시글
 const posts = [

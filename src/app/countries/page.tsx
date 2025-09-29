@@ -33,7 +33,7 @@ export default function CountriesPage() {
         if (!selectedCountry && companies && companies.length > 0) {
             setSelectedCountry(companies[0].country);
         }
-    }, [companies, selectedCountry]);
+    }, [companies, selectedCountry, setSelectedCountry]);
 
     // 현재 선택된 국가에 속한 회사 목록
     const companiesInCountry = useMemo(() => {

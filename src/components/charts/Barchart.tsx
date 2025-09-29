@@ -20,10 +20,9 @@ export interface BarChartProps {
     barSize?: number;
     barGap?: number;
     barCategoryGap?: number | string;
-    barColor?: string;
 }
 
-const BarChart: React.FC<BarChartProps> = ({ data, valueKey = 'value', label, maxBarSize, barSize, barGap, barCategoryGap, barColor = '#8884d8' }) => {
+const BarChart: React.FC<BarChartProps> = ({ data, valueKey = 'value', maxBarSize, barSize, barGap, barCategoryGap }) => {
     const _maxBarSize = maxBarSize ?? 150;
     const _barGap = barGap ?? 8;
     const _barCategoryGap = barCategoryGap ?? '10%';

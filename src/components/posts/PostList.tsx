@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createOrUpdatePost } from '../../lib/api';
 import type { Post } from '../../lib/api';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NavDrawer from '../../components/layout/NavDrawer';
 import Header from '../../components/layout/Header';
 
@@ -42,7 +42,7 @@ export default function CompaniesPage() {
     } = useQuery({ queryKey: ['posts'], queryFn: fetchPosts });
 
     // 로딩 이후 기본 선택값 설정
-    React.useEffect(() => {
+    useEffect(() => {
         if (!selectedId && companies && companies.length > 0) {
             setSelectedId(companies[0].id);
         }
