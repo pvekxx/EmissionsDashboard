@@ -1,103 +1,136 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useMemo } from 'react';
+import NavDrawer from '../components/layout/NavDrawer';
+import Header from '../components/layout/Header';
+import { useDashboardData } from '../hooks/useDashboardData';
+
+// 전역 상태와 데이터 패칭 훅
+import { useGlobalState } from '../state/useGlobalState';
+import { useQuery } from '@tanstack/react-query';
+import { fetchCompanies } from '../lib/api';
+
+// KPI 카드와 차트 컴포넌트
+import KpiCard from '../components/kpi/KpiCard';
+import LineChart from '../components/charts/LineChart';
+import BarChart from '../components/charts/Barchart';
+import DonutChart from '../components/charts/DonutChart';
+
+export default function DashboardPage() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // 전역 상태에서 기간, 탄소세 단가, 그룹기준 가져오기
+  const { period, carbonPrice, groupBy } = useGlobalState();
+
+  // 회사 데이터를 비동기 로드 React Query
+  const {
+    data: companies,
+    isPending: companiesPending,
+    isError: companiesError,
+  } = useQuery({
+    queryKey: ['companies'],
+    queryFn: fetchCompanies,
+  });
+
+  // 공용 훅 (라인/도넛/총합/YoY)
+  const base = useDashboardData(companies ?? [], period);
+
+  // 이 페이지 전용 - 회사/국가 기준 바 차트만 메모이제이션
+  const barData = useMemo(() => {
+    if (!companies) return [] as { name: string; value: number }[];
+    const barMap = new Map<string, number>();
+    companies.forEach((company) => {
+      let sum = 0;
+      company.emissions.forEach((e) => {
+        if (e.yearMonth >= period.from && e.yearMonth <= period.to) {
+          sum += e.emissions;
+        }
+      });
+      const key = groupBy === 'company' ? company.name : company.country;
+      barMap.set(key, (barMap.get(key) || 0) + sum);
+    });
+    return Array.from(barMap.entries()).map(([name, value]) => ({ name, value }));
+  }, [companies, period, groupBy]);
+
+  // 최종 대시보드 데이터 (불변성 유지를 위해 메모이제이션)
+  const dashboardData = useMemo(() => ({
+    totalEmissions: base.total,
+    prevYearTotal: base.prevYearTotal,
+    delta: base.delta,
+    lineData: base.lineData,
+    donutData: base.donutData,
+    barData,
+  }), [base, barData]);
+
+  // 예상 탄소세 = 총 배출량 × 단가
+  const estimatedTax = dashboardData.totalEmissions * carbonPrice;
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <>
+      {/* 네비게이션 드로어 */}
+      <NavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      {/* 페이지 래퍼 */}
+      <div className="min-h-screen bg-neutral-900">
+        {/* 헤더 - 페이지 제목 전달 */}
+        <Header
+          onToggleDrawer={() => setDrawerOpen((v) => !v)}
+          title="대시보드 홈" />
+        {/* 메인 콘텐츠 */}
+        <main className="p-4 space-y-6">
+          {/* 로딩/에러 처리 */}
+          {companiesPending && (<div className='h-[calc(100vh-64px)] flex justify-center items-center'>
+            <p className="text-neutral-600 dark:text-neutral-300">데이터를 불러오는 중입니다…</p>
+          </div>
+          )}
+          {companiesError && (<div className='h-[calc(100vh-64px)] flex justify-center items-center'>
+            <p className="text-red-600 dark:text-red-400 flex justify-center">데이터를 불러오지 못했습니다. 다시 시도해 주세요.</p>
+          </div>
+          )}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          {/* 데이터가 준비되면 KPI와 차트 표시 */}
+          {companies && (
+            <>
+              {/* KPI 카드 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <KpiCard
+                  label="총 배출량(톤)"
+                  value={dashboardData.totalEmissions.toLocaleString()}
+                  numericValue={dashboardData.totalEmissions}
+                  yoyPrevTotal={dashboardData.prevYearTotal}
+                />
+                <KpiCard
+                  label="예상 탄소세"
+                  value={estimatedTax.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' USD'}
+                />
+                <KpiCard
+                  label="전년도 배출량(톤)"
+                  value={dashboardData.prevYearTotal.toLocaleString()}
+                />
+              </div>
+
+              {/* 차트 */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="bg-neutral-800 p-4 rounded-4xl border border-white/10 shadow">
+                  <h2 className="text-lg font-semibold text-neutral-200 mb-2">월별 배출량 추세</h2>
+                  <LineChart data={dashboardData.lineData} label="배출량" />
+                </div>
+                <div className="bg-neutral-800 p-4 rounded-4xl border border-white/10 shadow">
+                  <h2 className="text-lg font-semibold text-neutral-200 mb-2">에너지원별 비중</h2>
+                  <DonutChart data={dashboardData.donutData} label="에너지원" />
+                </div>
+              </div>
+
+              {/* 비교 차트 (회사/국가) */}
+              <div className="bg-neutral-800 p-4 rounded-4xl border border-white/10 shadow">
+                <h2 className="text-lg font-semibold text-neutral-200 mb-2">
+                  {groupBy === 'company' ? '회사별 배출량' : '국가별 배출량'}
+                </h2>
+                <BarChart data={dashboardData.barData} label={groupBy === 'company' ? '회사' : '국가'} />
+              </div>
+            </>
+          )}
+        </main>
+      </div>
+    </>
   );
 }
