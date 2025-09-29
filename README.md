@@ -1,6 +1,6 @@
 # Emissions Dashboard
 
-[배포 주소 (Vercel)](https://)
+[배포 주소 (Vercel)](https://emissions-dashboard-eta.vercel.app)
 
 기업 및 국가별 가스 배출량을 분석하고, 기간/단가 설정 및 게시물 관리 기능을 제공하는 대시보드 웹 애플리케이션입니다.  
 과제의 요구사항을 기반으로 Next.js, React, TypeScript로 구현했습니다.
@@ -9,7 +9,7 @@
 
 ## 실행 방법
 
-[배포된 링크로 확인 (Vercel)](https://) 또는 로컬 실행
+[배포된 링크로 확인 (Vercel)](https://emissions-dashboard-eta.vercel.app) 또는 로컬 실행
 ```bash
 # 패키지 설치
 npm i
